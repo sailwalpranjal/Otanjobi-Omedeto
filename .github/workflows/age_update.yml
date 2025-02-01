@@ -1,0 +1,41 @@
+name: Daily Age Update
+
+# Define the schedule for running the action
+on:
+  schedule:
+    # Run the job every day at 10:00 PM UTC
+    - cron: '0 22 * * *'
+
+jobs:
+  update_age:
+    runs-on: ubuntu-latest  # This is the OS that the action will run on
+
+    steps:
+    # Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    # Set up Node.js environment
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14'  # You can change this version if needed
+
+    # Install dependencies
+    - name: Install dependencies
+      run: npm install
+
+    # Run the script to update ages
+    - name: Run age update script
+      run: node age_update_data.js
+
+    # Commit and push changes if any updates to the YAML file are made
+    - name: Commit and push changes
+      run: |
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git add people_data.yaml
+        git commit -m "Update ages in people_data.yaml"
+        git push
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Token to push changes to GitHub
